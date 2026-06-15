@@ -1491,6 +1491,15 @@ select.field-input { appearance: none; cursor: pointer; }
   color: var(--text-2);
   border: 1px solid var(--border);
 }
+.pedido-direccion {
+  font-size: 13px;
+  color: var(--text-1);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  line-height: 1.4;
+}
 .pedido-foot {
   display: flex;
   align-items: center;

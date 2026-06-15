@@ -4,7 +4,7 @@
 // "Pendiente" para que el moderador lo revise. Sin editar/borrar/historial.
 
 import { useEffect, useState, useCallback } from "react";
-import { Boxes, ShoppingBag, LogOut, X, Wallet, Truck } from "lucide-react";
+import { Boxes, ShoppingBag, LogOut, X, Wallet, Truck, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { usePerfumes } from "../../hooks/usePerfumes";
 
@@ -18,6 +18,7 @@ export default function ClientScreen({ onLogout }) {
   const [selected, setSelected] = useState(null); // perfume del modal
   const [pago, setPago] = useState("");
   const [entrega, setEntrega] = useState("");
+  const [direccion, setDireccion] = useState(""); // solo cuando entrega === "Envío"
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
@@ -32,12 +33,17 @@ export default function ClientScreen({ onLogout }) {
     setSelected(p);
     setPago("");
     setEntrega("");
+    setDireccion("");
   };
   const closeRequest = () => setSelected(null);
 
   const submitRequest = async () => {
     if (!pago || !entrega) {
       toast.error("Selecciona método de pago y de entrega.");
+      return;
+    }
+    if (entrega === "Envío" && !direccion.trim()) {
+      toast.error("Indica la dirección de envío.");
       return;
     }
     setBusy(true);
@@ -47,6 +53,7 @@ export default function ClientScreen({ onLogout }) {
       precio: Number(selected.precio) || 0,
       metodo_pago: pago,
       metodo_entrega: entrega,
+      direccion_envio: entrega === "Envío" ? direccion.trim() : null,
     });
     setBusy(false);
     if (error) {
@@ -160,6 +167,24 @@ export default function ClientScreen({ onLogout }) {
                 ))}
               </div>
             </div>
+
+            {/* Dirección: solo si eligió Envío */}
+            {entrega === "Envío" && (
+              <label className="field field--full" style={{ marginBottom: 18 }}>
+                <span className="field-label">
+                  <MapPin size={13} style={{ marginRight: 6, verticalAlign: "-2px" }} />
+                  Dirección de envío
+                </span>
+                <textarea
+                  className="field-input"
+                  rows={2}
+                  placeholder="Calle, número, comuna, referencia…"
+                  value={direccion}
+                  onChange={(e) => setDireccion(e.target.value)}
+                  style={{ resize: "vertical" }}
+                />
+              </label>
+            )}
 
             <button className="cta-button" onClick={submitRequest} disabled={busy} style={{ marginTop: 10 }}>
               <ShoppingBag size={20} strokeWidth={2.5} />

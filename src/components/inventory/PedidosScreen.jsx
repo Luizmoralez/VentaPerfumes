@@ -73,6 +73,9 @@ export default function PedidosScreen({ onBack }) {
                   <span className="pedido-tag">📦 {p.metodo_entrega}</span>
                   <span className="pedido-tag">${Number(p.precio).toLocaleString("es-CL")}</span>
                 </div>
+                {p.metodo_entrega === "Envío" && p.direccion_envio && (
+                  <div className="pedido-direccion">📍 {p.direccion_envio}</div>
+                )}
                 <div className="pedido-foot">
                   <span>{p.cliente_email || "—"}</span>
                   <span>{formatFecha(p)}</span>

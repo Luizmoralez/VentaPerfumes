@@ -52,9 +52,10 @@
 //     perfume_id     uuid references public.perfumes(id) on delete set null,
 //     nombre         text not null,
 //     precio         numeric not null default 0,
-//     metodo_pago    text not null,      -- 'Efectivo' | 'Transferencia'
-//     metodo_entrega text not null,      -- 'Retiro' | 'Envío'
-//     cliente_email  text,
+//     metodo_pago     text not null,     -- 'Efectivo' | 'Transferencia'
+//     metodo_entrega  text not null,     -- 'Retiro' | 'Envío'
+//     direccion_envio text,              -- solo cuando metodo_entrega = 'Envío'
+//     cliente_email   text,
 //     estado         text not null default 'Pendiente',
 //     created_at     timestamptz default now()
 //   );
