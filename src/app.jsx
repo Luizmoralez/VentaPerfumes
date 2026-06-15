@@ -1,140 +1,111 @@
-// App.jsx — Punto de entrada principal
-// Para extender: aquí puedes integrar React Router si la app crece
-import { useState } from "react";
-import * as DashboardModule from "./components/dashboards";
-const Dashboard = DashboardModule.Dashboard || DashboardModule.default || (() => null);5 
-import DaySelector from "./components/dayselector"; 
-import TemplateSelector from "./components/templateselector"; 
-import CategorySelector from "./components/categoryselector"; 
-import WorkoutForm from "./components/workoutform"; 
-import WorkoutSummary from "./components/workoutsummary"; 
+// src/app.jsx
+// App de Venta de Perfumes — inventario + ventas sobre Supabase.
+// Pantalla de inicio: menú "Monitoreo de Datos" (estilo Huertisur).
+// El antiguo flujo de entrenamiento (treino) permanece en disco pero ya no se renderiza.
 
-// Vistas posibles de la app (máquina de estados simple)
+import { useState } from "react";
+import { useAuth } from "./contexts/AuthContext";
+
+// ── Auth ───────────────────────────────────────────────────
+import AuthScreen from "./components/auth/AuthScreen";
+
+// ── Módulo de perfumes (admin) ────────────────────────────
+import DataMonitor from "./components/inventory/DataMonitor";
+import PerfumeManager from "./components/inventory/PerfumeManager";
+import SellPerfume from "./components/inventory/SellPerfume";
+import SalesHistory from "./components/inventory/SalesHistory";
+import PedidosScreen from "./components/inventory/PedidosScreen";
+
+// ── Cliente ────────────────────────────────────────────────
+import ClientScreen from "./components/client/ClientScreen";
+
+// Correo del administrador/moderador. El resto de cuentas ven la interfaz de cliente.
+const ADMIN_EMAIL = "l.morales64@alumnos.santotomas.cl";
+
+// ── Vistas (admin) ─────────────────────────────────────────
 const VIEWS = {
-  DASHBOARD: "dashboards",
-  TEMPLATE_SELECTOR: "template_selector", 
-  DAY_SELECTOR: "day_selector",
-  CATEGORY_SELECTOR: "category_selector",
-  WORKOUT_FORM: "workout_form",
-  SUMMARY: "summary",
+  MONITOR: "monitor",
+  PERFUMES: "perfumes",
+  SELL: "sell",
+  HISTORY: "history",
+  PEDIDOS: "pedidos",
 };
 
-// Función auxiliar para generar la estructura de una serie vacía
-const newSet = () => ({
-  id: Date.now() + Math.random(), 
-  weight: "",
-  reps: "",
-  done: false,
-});
-
 export default function App() {
-  const [view, setView] = useState(VIEWS.DASHBOARD);
-  const [selectedDay, setSelectedDay] = useState(null);
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedTemplate, setSelectedTemplate] = useState(null); 
-  const [savedWorkout, setSavedWorkout] = useState(null);
+  const { user, loading, logout } = useAuth();
 
-  // Navegar hacia adelante / atrás sin perder estado
-  const navigate = (nextView) => setView(nextView);
+  const [view, setView] = useState(VIEWS.MONITOR);
 
-  // Handler al dar inicio en el Dashboard
-  const handleStart = () => navigate(VIEWS.TEMPLATE_SELECTOR);
+  const navigate = (next) => setView(next);
+  const goMonitor = () => navigate(VIEWS.MONITOR);
 
-  // Nuevo handler: cuando el usuario elige plantilla
-  const handleTemplateSelected = (template) => {
-    setSelectedTemplate(template);
-    navigate(VIEWS.DAY_SELECTOR); // Salta directo a elegir el día
+  // Cierra sesión y vuelve a la pantalla de acceso.
+  const handleLogout = async () => {
+    await logout();
+    setView(VIEWS.MONITOR);
   };
 
-  // Modificar handleDaySelected para bifurcar el flujo
-  const handleDaySelected = (day) => {
-    setSelectedDay(day);
-    if (selectedTemplate && selectedTemplate.id !== "custom") {
-      // Plantilla con ejercicios -> saltar CategorySelector e ir al Formulario
-      navigate(VIEWS.WORKOUT_FORM);
-    } else {
-      // Flujo personalizado -> va a elegir los músculos primero
-      navigate(VIEWS.CATEGORY_SELECTOR);
-    }
+  // Mapea las claves del menú DataMonitor a vistas
+  const handleMenuNavigate = (key) => {
+    if (key === "perfumes") navigate(VIEWS.PERFUMES);
+    else if (key === "sell") navigate(VIEWS.SELL);
+    else if (key === "history") navigate(VIEWS.HISTORY);
+    else if (key === "pedidos") navigate(VIEWS.PEDIDOS);
   };
 
-  const handleCategoriesConfirmed = (cats) => {
-    setSelectedCategories(cats);
-    navigate(VIEWS.WORKOUT_FORM);
-  };
+  // ── Splash de carga de auth ────────────────────────────
+  if (loading) {
+    return (
+      <div className="app-root" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "#0F0F14" }}>
+        <div style={{
+          width: 40,
+          height: 40,
+          borderRadius: "50%",
+          border: "3px solid #2E2E40",
+          borderTopColor: "#7C3AED",
+          animation: "spin 0.8s linear infinite",
+        }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
-  const handleWorkoutSaved = (workout) => {
-    setSavedWorkout(workout);
-    navigate(VIEWS.SUMMARY);
-  };
+  // ── Gate de auth: requiere sesión real ─────────────────
+  if (!user) {
+    return (
+      <div className="app-root" style={{ minHeight: "100vh", background: "#0F0F14" }}>
+        <AuthScreen />
+      </div>
+    );
+  }
 
-  const handleReset = () => {
-    setSelectedDay(null);
-    setSelectedCategories([]);
-    setSelectedTemplate(null);
-    setSavedWorkout(null);
-    navigate(VIEWS.DASHBOARD);
-  };
+  const isAdmin = user.email === ADMIN_EMAIL;
 
+  // ── Cliente (no admin): solo catálogo + solicitud de compra ──
+  if (!isAdmin) {
+    return (
+      <div className="app-root" style={{ minHeight: "100vh", background: "#0F0F14" }}>
+        <ClientScreen onLogout={handleLogout} />
+      </div>
+    );
+  }
+
+  // ── Admin / moderador ──────────────────────────────────
   return (
-    <div className="app-root">
-      {view === VIEWS.DASHBOARD && (
-        <Dashboard onStart={handleStart} />
+    <div className="app-root" style={{ minHeight: "100vh", background: "#0F0F14" }}>
+      {view === VIEWS.MONITOR && (
+        <DataMonitor onNavigate={handleMenuNavigate} onLogout={handleLogout} />
       )}
 
-      {view === VIEWS.TEMPLATE_SELECTOR && (
-        <TemplateSelector
-          onSelect={handleTemplateSelected}
-          onBack={handleReset}
-        />
-      )}
-      
-      {view === VIEWS.DAY_SELECTOR && (
-        <DaySelector
-          onSelect={handleDaySelected}
-          onBack={() => navigate(VIEWS.TEMPLATE_SELECTOR)}
-        />
+      {view === VIEWS.PERFUMES && <PerfumeManager onBack={goMonitor} />}
+
+      {view === VIEWS.SELL && (
+        <SellPerfume onBack={goMonitor} onSold={() => navigate(VIEWS.HISTORY)} />
       )}
 
-      {view === VIEWS.CATEGORY_SELECTOR && (
-        <CategorySelector
-          day={selectedDay}
-          onConfirm={handleCategoriesConfirmed}
-          onBack={() => navigate(VIEWS.DAY_SELECTOR)}
-        />
-      )}
+      {view === VIEWS.HISTORY && <SalesHistory onBack={goMonitor} />}
 
-      {view === VIEWS.WORKOUT_FORM && (
-        <WorkoutForm
-          day={selectedDay}
-          // Si hay plantilla válida, mapeamos sus categorías internas. Si no, las seleccionadas a mano.
-          categories={
-            selectedTemplate && selectedTemplate.categories
-              ? selectedTemplate.categories.map((c) => c.name)
-              : selectedCategories
-          }
-          templateCategories={
-            selectedTemplate && selectedTemplate.categories 
-              ? selectedTemplate.categories 
-              : null
-          }
-          onSave={handleWorkoutSaved}
-          onBack={() => {
-            if (selectedTemplate && selectedTemplate.id !== "custom") {
-              navigate(VIEWS.DAY_SELECTOR);
-            } else {
-              navigate(VIEWS.CATEGORY_SELECTOR);
-            }
-          }}
-        />
-      )}
-
-      {view === VIEWS.SUMMARY && (
-        <WorkoutSummary
-          workout={savedWorkout}
-          onDone={handleReset}
-        />
-      )}
+      {view === VIEWS.PEDIDOS && <PedidosScreen onBack={goMonitor} />}
     </div>
   );
 }

@@ -1,0 +1,173 @@
+// src/components/client/ClientScreen.jsx
+// Interfaz de cliente (no admin): catálogo de perfumes en solo lectura +
+// solicitud de compra (método de pago y entrega). Registra un pedido
+// "Pendiente" para que el moderador lo revise. Sin editar/borrar/historial.
+
+import { useEffect, useState, useCallback } from "react";
+import { Boxes, ShoppingBag, LogOut, X, Wallet, Truck } from "lucide-react";
+import { toast } from "sonner";
+import { usePerfumes } from "../../hooks/usePerfumes";
+
+const PAGOS = ["Efectivo", "Transferencia"];
+const ENTREGAS = ["Retiro", "Envío"];
+
+export default function ClientScreen({ onLogout }) {
+  const { fetchPerfumes, createPedido } = usePerfumes();
+
+  const [perfumes, setPerfumes] = useState([]);
+  const [selected, setSelected] = useState(null); // perfume del modal
+  const [pago, setPago] = useState("");
+  const [entrega, setEntrega] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const load = useCallback(async () => {
+    setPerfumes(await fetchPerfumes());
+  }, [fetchPerfumes]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const openRequest = (p) => {
+    setSelected(p);
+    setPago("");
+    setEntrega("");
+  };
+  const closeRequest = () => setSelected(null);
+
+  const submitRequest = async () => {
+    if (!pago || !entrega) {
+      toast.error("Selecciona método de pago y de entrega.");
+      return;
+    }
+    setBusy(true);
+    const { error } = await createPedido({
+      perfume_id: selected.id,
+      nombre: selected.nombre,
+      precio: Number(selected.precio) || 0,
+      metodo_pago: pago,
+      metodo_entrega: entrega,
+    });
+    setBusy(false);
+    if (error) {
+      toast.error("No se pudo enviar la solicitud: " + error);
+      return;
+    }
+    toast.success("¡Solicitud enviada! Te contactaremos pronto.");
+    closeRequest();
+  };
+
+  return (
+    <div className="screen">
+      <div className="topbar">
+        <div className="logo-mark">
+          <Boxes size={20} strokeWidth={2.5} />
+        </div>
+        <div className="topbar-title">
+          <span className="step-label">Catálogo</span>
+          <h2>Perfumes disponibles</h2>
+        </div>
+        {onLogout && (
+          <button className="back-btn" onClick={onLogout} aria-label="Cerrar sesión" title="Cerrar sesión">
+            <LogOut size={18} />
+          </button>
+        )}
+      </div>
+
+      <div className="form-scroll">
+        {perfumes.length === 0 ? (
+          <div className="empty-state">
+            <p>No hay perfumes disponibles por ahora.</p>
+            <p>Vuelve más tarde.</p>
+          </div>
+        ) : (
+          <div className="catalog-list">
+            {perfumes.map((p) => (
+              <div key={p.id} className="catalog-card">
+                <div className="catalog-card-body">
+                  <span className="catalog-name">{p.nombre}</span>
+                  <span className="catalog-meta">
+                    {p.ml} ml{p.similar_a ? ` · Similar a: ${p.similar_a}` : ""}
+                  </span>
+                  <span className="catalog-price">${Number(p.precio).toLocaleString("es-CL")}</span>
+                </div>
+                <button
+                  className="catalog-buy-btn"
+                  onClick={() => openRequest(p)}
+                  disabled={Number(p.stock) <= 0}
+                >
+                  <ShoppingBag size={16} strokeWidth={2.4} />
+                  {Number(p.stock) <= 0 ? "Sin stock" : "Solicitar"}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Modal de solicitud de compra */}
+      {selected && (
+        <div className="modal-overlay" onClick={closeRequest}>
+          <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-head">
+              <div>
+                <span className="step-label">Solicitar compra</span>
+                <h3 className="modal-title">{selected.nombre}</h3>
+              </div>
+              <button className="back-btn" onClick={closeRequest} aria-label="Cerrar">
+                <X size={18} />
+              </button>
+            </div>
+
+            <p className="modal-price">
+              ${Number(selected.precio).toLocaleString("es-CL")} · {selected.ml} ml
+            </p>
+
+            {/* Método de pago */}
+            <div className="choice-group">
+              <span className="field-label">
+                <Wallet size={13} style={{ marginRight: 6, verticalAlign: "-2px" }} />
+                Método de pago
+              </span>
+              <div className="choice-row">
+                {PAGOS.map((opt) => (
+                  <button
+                    key={opt}
+                    className={`choice-chip${pago === opt ? " choice-chip--active" : ""}`}
+                    onClick={() => setPago(opt)}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Método de entrega */}
+            <div className="choice-group">
+              <span className="field-label">
+                <Truck size={13} style={{ marginRight: 6, verticalAlign: "-2px" }} />
+                Método de entrega
+              </span>
+              <div className="choice-row">
+                {ENTREGAS.map((opt) => (
+                  <button
+                    key={opt}
+                    className={`choice-chip${entrega === opt ? " choice-chip--active" : ""}`}
+                    onClick={() => setEntrega(opt)}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button className="cta-button" onClick={submitRequest} disabled={busy} style={{ marginTop: 10 }}>
+              <ShoppingBag size={20} strokeWidth={2.5} />
+              Enviar solicitud
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
