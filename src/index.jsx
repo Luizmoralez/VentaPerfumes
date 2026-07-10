@@ -11,6 +11,16 @@ import { AuthProvider } from "./contexts/AuthContext";
 import App from "./app";
 import "./styles.css";
 
+// ── PWA: registra el service worker solo en producción ─────
+// (en dev interferiría con el hot-reload de Vite)
+if ("serviceWorker" in navigator && import.meta.env.PROD) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch((err) => {
+      console.warn("[PWA] No se pudo registrar el service worker:", err);
+    });
+  });
+}
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ThemeProvider>
