@@ -82,6 +82,7 @@ import {
   localAddVenta,
   localGetPedidos,
   localCreatePedido,
+  localUpdatePedido,
 } from "../utils/perfumeStorage";
 
 const PERFUMES = "perfumes";
@@ -303,6 +304,28 @@ export function usePerfumes() {
     return data ?? [];
   }, [user]);
 
+  /**
+   * Cambia el estado de un pedido ('Pendiente' | 'Confirmado' | 'Rechazado'
+   * | 'Completado'). Solo el admin puede hacerlo en Supabase (RLS por email).
+   * Devuelve { data, error }.
+   */
+  const updatePedidoEstado = useCallback(async (id, estado) => {
+    if (!user) return { data: localUpdatePedido(id, { estado }), error: null };
+
+    const { data, error: err } = await supabase
+      .from(PEDIDOS)
+      .update({ estado })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (err) {
+      console.warn("[usePerfumes] updatePedidoEstado falló:", err.message);
+      return { data: null, error: err.message };
+    }
+    return { data, error: null };
+  }, [user]);
+
   return {
     loading,
     error,
@@ -314,5 +337,6 @@ export function usePerfumes() {
     sellPerfume,
     createPedido,
     fetchPedidos,
+    updatePedidoEstado,
   };
 }

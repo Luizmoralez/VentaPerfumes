@@ -80,3 +80,9 @@ export function localCreatePedido(pedido) {
   write(PEDIDOS_KEY, [nuevo, ...all]);
   return nuevo;
 }
+
+export function localUpdatePedido(id, cambios) {
+  const updated = read(PEDIDOS_KEY).map((p) => (p.id === id ? { ...p, ...cambios } : p));
+  write(PEDIDOS_KEY, updated);
+  return updated.find((p) => p.id === id) || null;
+}

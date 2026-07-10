@@ -1481,6 +1481,53 @@ select.field-input { appearance: none; cursor: pointer; }
   color: var(--success);
   border: 1px solid rgba(16, 185, 129, 0.4);
 }
+.pedido-estado--confirmado {
+  background: var(--primary-glow);
+  color: var(--accent);
+  border: 1px solid #7C3AED60;
+}
+.pedido-estado--rechazado {
+  background: var(--danger-dim);
+  color: var(--danger);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+/* Botones de acción del pedido (moderador) */
+.pedido-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.pedido-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 120px;
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+.pedido-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.pedido-btn--confirm {
+  border-color: rgba(16, 185, 129, 0.4);
+  color: var(--success);
+}
+.pedido-btn--confirm:hover:not(:disabled) { background: var(--success-dim); border-color: var(--success); }
+.pedido-btn--reject {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: var(--danger);
+}
+.pedido-btn--reject:hover:not(:disabled) { background: var(--danger-dim); border-color: var(--danger); }
+.pedido-btn--complete {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.pedido-btn--complete:hover:not(:disabled) { background: #8B5CF6; }
 .pedido-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .pedido-tag {
   font-size: 12px;
