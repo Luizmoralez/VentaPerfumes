@@ -1356,6 +1356,50 @@ select.field-input { appearance: none; cursor: pointer; }
 }
 .metric-note { font-size: 12px; color: var(--text-2); }
 
+/* ── Reportes de ventas (SalesReport) ────────────────────── */
+.chart-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 12px 8px;
+  margin-top: 14px;
+}
+.chart-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 10px;
+  padding-left: 4px;
+}
+
+.chart-tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+.chart-tooltip-label { font-size: 11px; color: var(--text-3); }
+.chart-tooltip-value { font-size: 14px; font-weight: 800; color: var(--text-1); }
+
+.report-table { display: flex; flex-direction: column; padding-bottom: 6px; }
+.report-table-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 4px;
+  border-bottom: 1px solid var(--border);
+}
+.report-table-row:last-child { border-bottom: none; }
+.report-table-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--text-1); min-width: 0; }
+.report-table-qty { font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.report-table-total { font-size: 13px; font-weight: 700; color: var(--text-1); font-variant-numeric: tabular-nums; }
+
 /* ── Búsqueda (inventario y catálogo) ────────────────────── */
 .search-wrap {
   position: relative;

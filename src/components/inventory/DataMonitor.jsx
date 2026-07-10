@@ -4,7 +4,7 @@
 // Incluye la métrica "Ingreso Total Potencial" = Σ(precio × stock).
 
 import { useEffect, useState, useCallback } from "react";
-import { Boxes, ShoppingCart, ClipboardList, Inbox, ChevronRight, LogOut, TrendingUp, AlertTriangle } from "lucide-react";
+import { Boxes, ShoppingCart, ClipboardList, Inbox, ChevronRight, LogOut, TrendingUp, AlertTriangle, BarChart3 } from "lucide-react";
 import { usePerfumes } from "../../hooks/usePerfumes";
 
 // Umbral de aviso: perfumes con stock igual o menor a esto aparecen en la alerta.
@@ -34,6 +34,12 @@ const ITEMS = [
     icon: Inbox,
     title: "Pedidos de clientes",
     subtitle: "Revisar solicitudes de compra",
+  },
+  {
+    key: "report",
+    icon: BarChart3,
+    title: "Reportes de ventas",
+    subtitle: "Ventas por día y perfumes más vendidos",
   },
 ];
 

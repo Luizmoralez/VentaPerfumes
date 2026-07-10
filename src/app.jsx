@@ -15,6 +15,7 @@ import PerfumeManager from "./components/inventory/PerfumeManager";
 import SellPerfume from "./components/inventory/SellPerfume";
 import SalesHistory from "./components/inventory/SalesHistory";
 import PedidosScreen from "./components/inventory/PedidosScreen";
+import SalesReport from "./components/inventory/SalesReport";
 
 // ── Cliente ────────────────────────────────────────────────
 import ClientScreen from "./components/client/ClientScreen";
@@ -29,6 +30,7 @@ const VIEWS = {
   SELL: "sell",
   HISTORY: "history",
   PEDIDOS: "pedidos",
+  REPORT: "report",
 };
 
 export default function App() {
@@ -51,6 +53,7 @@ export default function App() {
     else if (key === "sell") navigate(VIEWS.SELL);
     else if (key === "history") navigate(VIEWS.HISTORY);
     else if (key === "pedidos") navigate(VIEWS.PEDIDOS);
+    else if (key === "report") navigate(VIEWS.REPORT);
   };
 
   // ── Splash de carga de auth ────────────────────────────
@@ -106,6 +109,8 @@ export default function App() {
       {view === VIEWS.HISTORY && <SalesHistory onBack={goMonitor} />}
 
       {view === VIEWS.PEDIDOS && <PedidosScreen onBack={goMonitor} />}
+
+      {view === VIEWS.REPORT && <SalesReport onBack={goMonitor} />}
     </div>
   );
 }
