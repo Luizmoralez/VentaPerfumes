@@ -6,7 +6,7 @@
 // (la RLS de Supabase ya limita fetchPedidos a las suyas).
 
 import { useEffect, useState, useCallback } from "react";
-import { Boxes, ShoppingBag, ClipboardList, LogOut, X, Wallet, Truck, MapPin } from "lucide-react";
+import { Boxes, ShoppingBag, ClipboardList, LogOut, X, Wallet, Truck, MapPin, Search } from "lucide-react";
 import { toast } from "sonner";
 import { usePerfumes } from "../../hooks/usePerfumes";
 
@@ -37,6 +37,17 @@ export default function ClientScreen({ onLogout }) {
   const [entrega, setEntrega] = useState("");
   const [direccion, setDireccion] = useState(""); // solo cuando entrega === "Envío"
   const [busy, setBusy] = useState(false);
+  const [busqueda, setBusqueda] = useState("");
+
+  // Filtro client-side por nombre o "similar a"
+  const q = busqueda.trim().toLowerCase();
+  const visibles = q
+    ? perfumes.filter(
+        (p) =>
+          (p.nombre || "").toLowerCase().includes(q) ||
+          (p.similar_a || "").toLowerCase().includes(q)
+      )
+    : perfumes;
 
   const load = useCallback(async () => {
     setPerfumes(await fetchPerfumes());
@@ -127,15 +138,30 @@ export default function ClientScreen({ onLogout }) {
 
       <div className="form-scroll">
         {/* ── Catálogo ── */}
+        {tab === "catalogo" && perfumes.length > 0 && (
+          <div className="search-wrap" style={{ marginTop: 16 }}>
+            <Search size={16} className="search-icon" />
+            <input
+              className="field-input search-input"
+              placeholder="Buscar por nombre o similar a…"
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+            />
+          </div>
+        )}
         {tab === "catalogo" && (
           perfumes.length === 0 ? (
             <div className="empty-state">
               <p>No hay perfumes disponibles por ahora.</p>
               <p>Vuelve más tarde.</p>
             </div>
+          ) : visibles.length === 0 ? (
+            <div className="empty-state">
+              <p>Sin resultados para “{busqueda}”.</p>
+            </div>
           ) : (
             <div className="catalog-list">
-              {perfumes.map((p) => (
+              {visibles.map((p) => (
                 <div key={p.id} className="catalog-card">
                   <div className="catalog-card-body">
                     <span className="catalog-name">{p.nombre}</span>

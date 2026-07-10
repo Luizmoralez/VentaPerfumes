@@ -1356,6 +1356,21 @@ select.field-input { appearance: none; cursor: pointer; }
 }
 .metric-note { font-size: 12px; color: var(--text-2); }
 
+/* ── Búsqueda (inventario y catálogo) ────────────────────── */
+.search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-3);
+  pointer-events: none;
+}
+.search-input { padding-left: 38px; }
+
 /* ── Pestañas (ClientScreen) ─────────────────────────────── */
 .tab-bar {
   display: flex;

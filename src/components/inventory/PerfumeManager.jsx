@@ -4,7 +4,7 @@
 // con fallback a localStorage).
 
 import { useEffect, useState, useCallback } from "react";
-import { ArrowLeft, Plus, Pencil, Trash2, Check, X } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, Check, X, Search } from "lucide-react";
 import { toast } from "sonner";
 import { usePerfumes } from "../../hooks/usePerfumes";
 
@@ -18,6 +18,17 @@ export default function PerfumeManager({ onBack }) {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(EMPTY);
   const [busy, setBusy] = useState(false);
+  const [busqueda, setBusqueda] = useState("");
+
+  // Filtro client-side por nombre o "similar a" (sin llamadas extra a Supabase)
+  const q = busqueda.trim().toLowerCase();
+  const visibles = q
+    ? perfumes.filter(
+        (p) =>
+          (p.nombre || "").toLowerCase().includes(q) ||
+          (p.similar_a || "").toLowerCase().includes(q)
+      )
+    : perfumes;
 
   const load = useCallback(async () => {
     setPerfumes(await fetchPerfumes());
@@ -177,8 +188,21 @@ export default function PerfumeManager({ onBack }) {
 
         {/* Lista de perfumes */}
         <div className="recent-header" style={{ marginTop: 28 }}>
-          <span>Perfumes registrados ({perfumes.length})</span>
+          <span>Perfumes registrados ({visibles.length}{q ? ` de ${perfumes.length}` : ""})</span>
         </div>
+
+        {/* Búsqueda */}
+        {perfumes.length > 0 && (
+          <div className="search-wrap">
+            <Search size={16} className="search-icon" />
+            <input
+              className="field-input search-input"
+              placeholder="Buscar por nombre o similar a…"
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+            />
+          </div>
+        )}
 
         {perfumes.length === 0 && (
           <div className="empty-state">
@@ -187,8 +211,14 @@ export default function PerfumeManager({ onBack }) {
           </div>
         )}
 
+        {perfumes.length > 0 && visibles.length === 0 && (
+          <div className="empty-state">
+            <p>Sin resultados para “{busqueda}”.</p>
+          </div>
+        )}
+
         <div className="perfume-list">
-          {perfumes.map((p) =>
+          {visibles.map((p) =>
             editingId === p.id ? (
               // ── Modo edición ──
               <div key={p.id} className="perfume-row perfume-row--editing">
