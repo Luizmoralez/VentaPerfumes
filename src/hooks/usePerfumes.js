@@ -68,6 +68,32 @@
 //     with check (auth.uid() = user_id);
 //   create policy "pedidos update admin" on public.pedidos for update
 //     using ((auth.jwt() ->> 'email') = 'l.morales64@alumnos.santotomas.cl');
+//
+// ─────────────────────────────────────────────────────────────
+// PENDIENTE (fotos de perfumes) — NO ejecutar todavía, esperando
+// tener las imágenes. Cuando llegue el momento:
+//
+//   1. Columna para la URL pública de la foto:
+//      alter table public.perfumes add column if not exists foto_url text;
+//
+//   2. Bucket de Storage "perfumes" (Dashboard → Storage → New bucket,
+//      marcar "Public bucket") y políticas: lectura pública, escritura
+//      solo del admin. En SQL:
+//      create policy "fotos lectura publica" on storage.objects
+//        for select using (bucket_id = 'perfumes');
+//      create policy "fotos escribe admin" on storage.objects
+//        for insert to authenticated
+//        with check (bucket_id = 'perfumes'
+//          and (auth.jwt() ->> 'email') = 'l.morales64@alumnos.santotomas.cl');
+//      create policy "fotos borra admin" on storage.objects
+//        for delete to authenticated
+//        using (bucket_id = 'perfumes'
+//          and (auth.jwt() ->> 'email') = 'l.morales64@alumnos.santotomas.cl');
+//
+//   3. Flujo en la app (a implementar): subir con
+//      supabase.storage.from('perfumes').upload(`${id}.jpg`, file),
+//      obtener la URL con getPublicUrl y guardarla en foto_url; mostrar
+//      la miniatura en PerfumeManager y en el catálogo del cliente.
 // ─────────────────────────────────────────────────────────────
 
 import { useState, useCallback } from "react";
