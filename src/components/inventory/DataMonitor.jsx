@@ -4,8 +4,11 @@
 // Incluye la métrica "Ingreso Total Potencial" = Σ(precio × stock).
 
 import { useEffect, useState, useCallback } from "react";
-import { Boxes, ShoppingCart, ClipboardList, Inbox, ChevronRight, LogOut, TrendingUp } from "lucide-react";
+import { Boxes, ShoppingCart, ClipboardList, Inbox, ChevronRight, LogOut, TrendingUp, AlertTriangle } from "lucide-react";
 import { usePerfumes } from "../../hooks/usePerfumes";
+
+// Umbral de aviso: perfumes con stock igual o menor a esto aparecen en la alerta.
+export const LOW_STOCK_THRESHOLD = 3;
 
 const ITEMS = [
   {
@@ -37,6 +40,7 @@ const ITEMS = [
 export default function DataMonitor({ onNavigate, onLogout }) {
   const { fetchPerfumes } = usePerfumes();
   const [ingresoPotencial, setIngresoPotencial] = useState(0);
+  const [stockBajo, setStockBajo] = useState([]);
 
   const load = useCallback(async () => {
     const perfumes = await fetchPerfumes();
@@ -45,6 +49,11 @@ export default function DataMonitor({ onNavigate, onLogout }) {
       0
     );
     setIngresoPotencial(total);
+    setStockBajo(
+      perfumes
+        .filter((p) => Number(p.stock) <= LOW_STOCK_THRESHOLD)
+        .sort((a, b) => Number(a.stock) - Number(b.stock))
+    );
   }, [fetchPerfumes]);
 
   useEffect(() => {
@@ -87,6 +96,25 @@ export default function DataMonitor({ onNavigate, onLogout }) {
           </span>
         </div>
       </div>
+
+      {/* Alerta de stock bajo */}
+      {stockBajo.length > 0 && (
+        <div className="lowstock-card">
+          <div className="lowstock-head">
+            <AlertTriangle size={16} strokeWidth={2.4} />
+            <span>
+              Stock bajo ({stockBajo.length}) — {LOW_STOCK_THRESHOLD} unidades o menos
+            </span>
+          </div>
+          <div className="lowstock-list">
+            {stockBajo.map((p) => (
+              <span key={p.id} className="lowstock-chip">
+                {p.nombre}: <strong>{Number(p.stock) <= 0 ? "agotado" : `${p.stock} u.`}</strong>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="menu-list">
         {ITEMS.map(({ key, icon: Icon, title, subtitle }) => (

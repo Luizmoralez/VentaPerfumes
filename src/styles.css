@@ -1385,6 +1385,37 @@ select.field-input { appearance: none; cursor: pointer; }
   color: var(--accent);
 }
 
+/* ── Alerta de stock bajo (DataMonitor) ──────────────────── */
+.lowstock-card {
+  margin: 12px 16px 0;
+  padding: 14px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: var(--radius-lg);
+}
+.lowstock-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--warning);
+  margin-bottom: 10px;
+}
+.lowstock-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.lowstock-chip {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+.lowstock-chip strong { color: var(--warning); font-weight: 700; }
+
 /* ── Catálogo de cliente (ClientScreen) ──────────────────── */
 .catalog-list { display: flex; flex-direction: column; gap: 10px; padding: 16px 0 24px; }
 
